@@ -1,3 +1,4 @@
+/* imports */
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
@@ -6,10 +7,72 @@ const jwt = require("jsonwebtoken");
 
 const app = express();
 
-//Open Route - public route
+//config JSON response
+app.use(express.json())
+
+
+//Models 
+const User = require('./models/User')
+
+//open Route - public route
 app.get("/", (req, res) => {
   res.status(200).json({ msg: "Welcome to our api!" });
 });
+
+//register User
+app.post('/auth/register', async(req, res) => {
+
+    const { name, email, password, confirmpassword } = req.body
+
+    //validations
+    if(!name) {
+        return res.status(422).json({ msg: 'name is required!' })
+    }
+    
+    if(!email) {
+        return res.status(422).json({ msg: 'email is required!' })
+    }
+    
+    if(!password) {
+        return res.status(422).json({ msg: 'password is required!' })
+    }
+
+    if(password !== confirmpassword) {
+        return res.status(422).json({msg:'passwords do not match'})
+    }
+    
+    //check if user exists
+    const userExists = await User.findOne({ email: email })
+    
+    if (userExists) {
+        return res.status(422).json({ msg:'please, use another email!'})
+
+    }
+
+    //create password
+    const salt = await bcrypt.genSalt(12)
+    const passwordHash = await bcrypt.hash(password, salt)
+
+   //crate user 
+   const user = new User({
+    name, 
+    email,
+    password: passwordHash,
+   })
+
+   try {
+    await user.save()
+
+    res.status(201).json({ msg: 'user created successfully!'})
+
+   } catch(error) {
+    console.log(error)
+
+     res.status(500).json({msg: 'server error, try again later!'})
+
+   }
+
+})
 
 //credentials
 const dbUser = process.env.DB_USER
