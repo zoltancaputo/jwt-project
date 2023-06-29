@@ -20,10 +20,10 @@ app.get("/", (req, res) => {
 
 //privite Route
 
-app.get("/user/:id", async (req, res) => {
+app.get("/user/:id", checkToken, async (req, res) => {
   const id = req.params.id;
 
-  //check if user existis
+  //check if user exists
   const user = await User.findById(id, "-password");
 
   if (!user) {
@@ -33,32 +33,53 @@ app.get("/user/:id", async (req, res) => {
   res.status(200).json({ user})
 });
 
+//midleware 
+function checkToken(req, res, next) {
+   const authHeader = req.headers['autorization']
+   const token = authHeader && authHeader.split(" ")[1]
+
+   if(!token) {
+    res.status(401).json({ msg: 'Access denied!'})
+   }
+
+   try {
+
+    const secret = process.env.SECRET
+
+    jwt.verify(token, secret)
+
+   } catch(error) {
+     res.status(400).json({ msg: "Invalid Token"})
+   }
+
+}
+
 //register User
 app.post("/auth/register", async (req, res) => {
   const { name, email, password, confirmpassword } = req.body;
 
   //validations
   if (!name) {
-    return res.status(422).json({ msg: "name is required!" });
+    return res.status(422).json({ msg: "Name is required!" });
   }
 
   if (!email) {
-    return res.status(422).json({ msg: "email is required!" });
+    return res.status(422).json({ msg: "Email is required!" });
   }
 
   if (!password) {
-    return res.status(422).json({ msg: "password is required!" });
+    return res.status(422).json({ msg: "Password is required!" });
   }
 
   if (password !== confirmpassword) {
-    return res.status(422).json({ msg: "passwords do not match!!!" });
+    return res.status(422).json({ msg: "Passwords do not match!!!" });
   }
 
   //check if user exists
   const userExists = await User.findOne({ email: email });
 
   if (userExists) {
-    return res.status(422).json({ msg: "please, use another email!" });
+    return res.status(422).json({ msg: "Please, use another email!" });
   }
 
   //create password
@@ -75,12 +96,12 @@ app.post("/auth/register", async (req, res) => {
   try {
     await user.save();
 
-    res.status(201).json({ msg: "user created successfully!" });
+    res.status(201).json({ msg: "User created successfully!" });
   } catch (error) {
     console.log(error);
 
     res.status(500).json({
-      msg: "server error, try again later!",
+      msg: "Server error, try again later!",
     });
   }
 });
@@ -93,11 +114,11 @@ app.post("/auth/login", async (req, res) => {
   //validations
 
   if (!email) {
-    return res.status(422).json({ msg: "email is required!" });
+    return res.status(422).json({ msg: "Email is required!" });
   }
 
   if (!password) {
-    return res.status(422).json({ msg: "password is required!" });
+    return res.status(422).json({ msg: "Password is required!" });
   }
 
   // check if user exists
@@ -105,14 +126,14 @@ app.post("/auth/login", async (req, res) => {
   const user = await User.findOne({ email: email });
 
   if (!user) {
-    return res.status(404).json({ msg: "user not found!" });
+    return res.status(404).json({ msg: "User not found!" });
   }
 
   //check if password match
   const checkPassword = await bcrypt.compare(password, user.password);
 
   if (!checkPassword) {
-    return res.status(422).json({ msg: "invalid password!" });
+    return res.status(422).json({ msg: "Invalid password!" });
   }
 
   try {
