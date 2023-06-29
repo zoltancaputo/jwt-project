@@ -18,6 +18,20 @@ app.get("/", (req, res) => {
   res.status(200).json({ msg: "Welcome to our api!" });
 });
 
+//privite Route
+
+app.get("/User/:id", async (req, res) => {
+   const id = req.params.id
+
+   //check if user existis
+   const user = await User.findById(id, '-password')
+
+   if(!user) {
+      return res.status(404).json({ msg: 'User not found!!'})
+   }
+});
+
+
 //register User
 app.post("/auth/register", async (req, res) => {
   const { name, email, password, confirmpassword } = req.body;
