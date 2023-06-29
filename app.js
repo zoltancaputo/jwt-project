@@ -20,17 +20,18 @@ app.get("/", (req, res) => {
 
 //privite Route
 
-app.get("/User/:id", async (req, res) => {
-   const id = req.params.id
+app.get("/user/:id", async (req, res) => {
+  const id = req.params.id;
 
-   //check if user existis
-   const user = await User.findById(id, '-password')
+  //check if user existis
+  const user = await User.findById(id, "-password");
 
-   if(!user) {
-      return res.status(404).json({ msg: 'User not found!!'})
-   }
+  if (!user) {
+    return res.status(404).json({ msg: "User not found!!" });
+  }
+
+  res.status(200).json({ user})
 });
-
 
 //register User
 app.post("/auth/register", async (req, res) => {
@@ -50,7 +51,7 @@ app.post("/auth/register", async (req, res) => {
   }
 
   if (password !== confirmpassword) {
-    return res.status(422).json({ msg: "passwords do not match" });
+    return res.status(422).json({ msg: "passwords do not match!!!" });
   }
 
   //check if user exists
@@ -78,18 +79,20 @@ app.post("/auth/register", async (req, res) => {
   } catch (error) {
     console.log(error);
 
-    res.status(500).json({ msg: "server error, try again later!" });
+    res.status(500).json({
+      msg: "server error, try again later!",
+    });
   }
 });
 
 //login User
 
-app.post('/auth/login', async (req, res) => {
-    const { email, password } = req.body
+app.post("/auth/login", async (req, res) => {
+  const { email, password } = req.body;
 
- //validations
- 
- if (!email) {
+  //validations
+
+  if (!email) {
     return res.status(422).json({ msg: "email is required!" });
   }
 
@@ -99,41 +102,38 @@ app.post('/auth/login', async (req, res) => {
 
   // check if user exists
 
-  const user = await User.findOne({ email: email })
+  const user = await User.findOne({ email: email });
 
   if (!user) {
-    return res.status(404).json({ msg: 'user not found!'})
+    return res.status(404).json({ msg: "user not found!" });
   }
 
   //check if password match
-  const checkPassword = await bcrypt.compare(password, user.password)
+  const checkPassword = await bcrypt.compare(password, user.password);
 
-  if(!checkPassword) {
-    return res.status(422).json({ msg: 'invalid password!'})
+  if (!checkPassword) {
+    return res.status(422).json({ msg: "invalid password!" });
   }
 
   try {
-       
-    const secret = process.env.SECRET
+    const secret = process.env.SECRET;
 
     const token = jwt.sign(
-        {
+      {
         id: user._id,
-        },
-        secret,
-    )
+      },
+      secret
+    );
 
-    res.status(200).json({ msg: 'Authentication successful!', token})
-
+    res.status(200).json({ msg: "Authentication successful!", token });
   } catch (err) {
-    console.log(err)
+    console.log(err);
 
     res.status(500).json({
-        msg: 'Server error, try later',
-        })
-    }
-})
-
+      msg: "Server error, try later",
+    });
+  }
+});
 
 //credentials
 const dbUser = process.env.DB_USER;
@@ -145,6 +145,6 @@ mongoose
   )
   .then(() => {
     app.listen(3000);
-    console.log(`Connected!`)
+    console.log(`Connected!`);
   })
   .catch((err) => console.log(err));
