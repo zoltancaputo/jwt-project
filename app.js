@@ -13,12 +13,12 @@ app.use(express.json());
 //Models
 const User = require("./models/User");
 
-//open Route - public route
+// 1 - open Route - public route
 app.get("/", (req, res) => {
   res.status(200).json({ msg: "Welcome to our api!" });
 });
 
-//privite Route
+// 5 - privite Route
 
 app.get("/user/:id", checkToken, async (req, res) => {
   const id = req.params.id;
@@ -54,11 +54,11 @@ function checkToken(req, res, next) {
 
 }
 
-//register User
+// 2 - register User
 app.post("/auth/register", async (req, res) => {
   const { name, email, password, confirmpassword } = req.body;
 
-  //validations
+  // 3 - validations
   if (!name) {
     return res.status(422).json({ msg: "Name is required!" });
   }
@@ -106,12 +106,12 @@ app.post("/auth/register", async (req, res) => {
   }
 });
 
-//login User
+// 4 - login User
 
 app.post("/auth/login", async (req, res) => {
   const { email, password } = req.body;
 
-  //validations
+  // 3 - validations
 
   if (!email) {
     return res.status(422).json({ msg: "Email is required!" });
