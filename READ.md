@@ -1,4 +1,5 @@
-Howdy, guys. 
+Howdy, guys! 
+
 Post this to help a friend and also to let it be recorded.
 
 NODEjs, MongoDB, and Postman are required.
